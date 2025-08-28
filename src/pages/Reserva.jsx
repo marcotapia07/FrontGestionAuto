@@ -9,7 +9,13 @@ const Reserva = () => {
   const [reservas, setReservas] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
-  const [formData, setFormData] = useState({ clienteId: "", vehiculoId: "" });
+  const [formData, setFormData] = useState({
+    cliente: "",
+    vehiculo: "",
+    codigo: "",
+    descripcion: "",
+    fecha: ""
+  });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -37,12 +43,34 @@ const Reserva = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const generarCodigo = () => {
+    // Código aleatorio de 8 caracteres alfanuméricos
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+  };
+
+  const generarDescripcion = () => {
+    // Descripción aleatoria simple
+    const frases = [
+      "Reserva generada automáticamente",
+      "Reserva de vehículo",
+      "Reserva rápida",
+      "Reserva online",
+      "Reserva estándar"
+    ];
+    return frases[Math.floor(Math.random() * frases.length)];
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const reservaData = {
+      ...formData,
+      codigo: generarCodigo(),
+      descripcion: generarDescripcion()
+    };
     try {
-      await createReserva(formData);
+      await createReserva(reservaData);
       setMessage("Reserva registrada correctamente");
-      setFormData({ clienteId: "", vehiculoId: "" });
+      setFormData({ cliente: "", vehiculo: "", codigo: "", descripcion: "" });
       fetchData();
     } catch (err) {
       setMessage("Error al registrar la reserva");
@@ -75,8 +103,26 @@ const Reserva = () => {
       <div className="matriculas-card">
         <h3>Registrar Reserva</h3>
         <form onSubmit={handleSubmit} className="matriculas-form">
+          <label>Código:</label>
+          <input
+            type="text"
+            name="codigo"
+            value={formData.codigo}
+            onChange={handleChange}
+            required
+          />
+
+          <label>Descripción:</label>
+          <input
+            type="text"
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleChange}
+            required
+          />
+
           <label>Cliente:</label>
-          <select name="clienteId" value={formData.clienteId} onChange={handleChange} required>
+          <select name="cliente" value={formData.cliente} onChange={handleChange} required>
             <option value="">Selecciona un cliente</option>
             {clientes.map(e => (
               <option key={e._id} value={e._id}>{e.nombre} {e.apellido}</option>
@@ -84,12 +130,21 @@ const Reserva = () => {
           </select>
 
           <label>Vehículo:</label>
-          <select name="vehiculoId" value={formData.vehiculoId} onChange={handleChange} required>
+          <select name="vehiculo" value={formData.vehiculo} onChange={handleChange} required>
             <option value="">Selecciona un vehículo</option>
             {vehiculos.map(v => (
               <option key={v._id} value={v._id}>{v.marca} {v.modelo} ({v.placa})</option>
             ))}
           </select>
+
+          <label>Fecha:</label>
+          <input
+            type="date"
+            name="fecha"
+            value={formData.fecha}
+            onChange={handleChange}
+            required
+          />
 
           <button type="submit" className="btn-add">Registrar Reserva</button>
         </form>
